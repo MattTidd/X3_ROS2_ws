@@ -13,7 +13,7 @@ def generate_launch_description():
     agent_name = LaunchConfiguration("agent_name")
     agent_name_arg = DeclareLaunchArgument(
         "agent_name",
-        default_value = "agent",
+        default_value = "agent1",
         description   = "Namespace for the robot"
     )
 
