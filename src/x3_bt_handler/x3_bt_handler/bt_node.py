@@ -71,7 +71,7 @@ class BTNode(Node):
         self.declare_parameter("agent_initial_x", 0.0)
         self.declare_parameter("agent_initial_y", 0.0)
         self.declare_parameter("agent_initial_yaw", 0.0)
-        self.declare_parameter("model_name", "SAC_001")
+        self.declare_parameter("drl_model", "SAC_132")
         self.declare_parameter("num_agents", 2)
         self.declare_parameter("model_path", "")
         self.declare_parameter("goal_tolerance", 0.20)
@@ -83,7 +83,7 @@ class BTNode(Node):
         self.agent_initial_x   = self.get_parameter("agent_initial_x").value
         self.agent_initial_y   = self.get_parameter("agent_initial_y").value
         self.agent_initial_yaw = self.get_parameter("agent_initial_yaw").value
-        self.model_name        = self.get_parameter("model_name").value
+        self.drl_model        = self.get_parameter("drl_model").value
         self.num_agents        = self.get_parameter("num_agents").value
         self.model_path        = self.get_parameter("model_path").value
         self.goal_tolerance    = self.get_parameter("goal_tolerance").value
@@ -102,6 +102,8 @@ class BTNode(Node):
         self.nav_failed:            bool                        =       False       # flag for navigational success
         self.policy_process                                     =       None        # handle for the policy subprocess
         self.goal_process                                       =       None        # handle for the goal subprocess
+        self.collision_count                                    =       0           # counter for collisions
+        self.timeout_count                                      =       0           # counter for timeouts     
 
         ##### create subscribers: #####
         # subscriber for the goal:
@@ -375,7 +377,7 @@ class BTNode(Node):
             # spin up node:
             self.policy_process = subprocess.Popen([
                 "ros2", "run", "x3_drl_policy", "policy_node", "--ros-args",
-                "-p", f"model_name:={self.model_name}",
+                "-p", f"model_name:={self.drl_model}",
                 "-p", f"agent_name:={self.agent_name}",
                 "-p", f"agent_initial_yaw:={self.agent_initial_yaw}",
                 "-p", f"goal_timeout:={self.goal_timeout}"], start_new_session = True)
