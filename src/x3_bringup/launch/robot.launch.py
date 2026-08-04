@@ -17,8 +17,10 @@ def generate_launch_description():
     # define paths:
     description_path = get_package_share_directory("x3_description")
     bringup_path     = get_package_share_directory("x3_bringup")
+    bt_path          = get_package_share_directory("x3_bt_handler")
     model_path       = os.path.join(description_path, "urdf", "x3.urdf.xacro")
     odom_path        = os.path.join(bringup_path, "launch", "odom.launch.py")
+    bt_launch_path   = os.path.join(bt_path, "launch", "bt_launch.py") 
 
     # define arguments:
     agent_name = LaunchConfiguration("agent_name")
@@ -40,6 +42,41 @@ def generate_launch_description():
         "model",
         default_value = model_path,
         description   = "Absolute path to robot URDF/xacro file"
+    )
+
+    agent_initial_x = LaunchConfiguration("agent_initial_x")
+    agent_initial_x_arg = DeclareLaunchArgument(
+        "agent_initial_x",
+        default_value = "0.0",
+        description   = "Initial global x position of the agent to be launched"
+    )
+
+    agent_initial_y = LaunchConfiguration("agent_initial_y")
+    agent_initial_y_arg = DeclareLaunchArgument(
+        "agent_initial_y",
+        default_value = "0.0",
+        description   = "Initial global y position of the agent to be launched"
+    )
+
+    agent_initial_yaw = LaunchConfiguration("agent_initial_yaw")
+    agent_initial_yaw_arg = DeclareLaunchArgument(
+        "agent_initial_yaw",
+        default_value = "0.0",
+        description   = "Initial global yaw of the agent to be launched"
+    )
+
+    num_agents = LaunchConfiguration("num_agents")
+    num_agents_arg = DeclareLaunchArgument(
+        "num_agents",
+        default_value = "2",
+        description   = "Number of agents in the MRS"
+    )
+
+    drl_model = LaunchConfiguration("drl_model")
+    drl_model_arg = DeclareLaunchArgument(
+        "drl_model",
+        default_value = "SAC_132",
+        description   = "DRL model to be used for the navigational policy"
     )
 
     # form the robot description:
@@ -97,15 +134,36 @@ def generate_launch_description():
         }]
     )
 
+    # BT node:
+    bt_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([bt_launch_path]), 
+        launch_arguments = {
+            "agent_name"         : agent_name,
+            "agent_type"         : agent_type,
+            "agent_initial_x"    : agent_initial_x,
+            "agent_initial_y"    : agent_initial_y,
+            "agent_initial_yaw"  : agent_initial_yaw,
+            "num_agents"         : num_agents,
+            "drl_model"          : drl_model,
+            "model_path"         : model_path
+        }.items()
+    )
+
     return LaunchDescription([
         # args:
         agent_name_arg,
         agent_type_arg, 
         model_arg,
+        agent_initial_x_arg,
+        agent_initial_y_arg,
+        agent_initial_yaw_arg,
+        num_agents_arg,
+        drl_model_arg,
 
         # nodes:
         robot_state_publisher_node,
         lidar_node, 
         odom_nodes, 
-        driver_node
+        driver_node,
+        bt_node
     ])
