@@ -83,7 +83,7 @@ class BTNode(Node):
         self.agent_initial_x   = self.get_parameter("agent_initial_x").value
         self.agent_initial_y   = self.get_parameter("agent_initial_y").value
         self.agent_initial_yaw = self.get_parameter("agent_initial_yaw").value
-        self.drl_model        = self.get_parameter("drl_model").value
+        self.drl_model         = self.get_parameter("drl_model").value
         self.num_agents        = self.get_parameter("num_agents").value
         self.model_path        = self.get_parameter("model_path").value
         self.goal_tolerance    = self.get_parameter("goal_tolerance").value
@@ -102,6 +102,7 @@ class BTNode(Node):
         self.nav_failed:            bool                        =       False       # flag for navigational success
         self.policy_process                                     =       None        # handle for the policy subprocess
         self.goal_process                                       =       None        # handle for the goal subprocess
+        self.rebroadcast_count                                  =       0           # counter for goal rebroadcasting
         self.collision_count                                    =       0           # counter for collisions
         self.timeout_count                                      =       0           # counter for timeouts     
 
@@ -180,7 +181,7 @@ class BTNode(Node):
         """
         # handle goal clearance signal:
         if msg.required_capability == "":
-            # self.get_logger().info("Goal cleared by winner")
+            self.get_logger().info("Goal cleared by winner")
             self.goal     = None
             self.all_bids = {}
             self.new_goal = False
