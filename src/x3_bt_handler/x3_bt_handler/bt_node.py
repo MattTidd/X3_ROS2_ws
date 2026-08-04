@@ -198,6 +198,10 @@ class BTNode(Node):
 
         # add the goal id to the class:
         self.goal_id = msg.id
+        
+        # reset rebroadcast counter on fresh goals:
+        if "_rebroadcast" not in msg.id:
+            self.rebroadcast_count = 0
 
         # reset the list of bids upon receiving a new goal:
         self.all_bids = {}
@@ -342,6 +346,9 @@ class BTNode(Node):
         msg.pose                = self.goal
         msg.required_capability = self.required_capability
         self.goal_pub.publish(msg)
+
+        # advance rebroadcast counter:
+        self.rebroadcast_count += 1
 
     # define method for monitoring goal process:
     def _monitor_goal_process(self):
