@@ -148,18 +148,8 @@ class DRLPolicyNode(Node):
 
     # define lidar callback:
     def lidar_callback(self, msg : LaserScan):
-        # pull range data from msg:
-        ranges = np.array(msg.ranges)
-
-        # get the index of the zero angle in the (-pi, pi) scan:
-        zero_idx = round(-msg.angle_min / msg.angle_increment)
-
-        # shift the lidar data from (-pi, pi) to (0, 2pi), so that it aligns with MuJoCo:
-        ranges_rotated = np.roll(ranges, -zero_idx)
-
         # populate latest scan:
-        self.latest_scan        = copy.deepcopy(msg)
-        self.latest_scan.ranges = ranges_rotated.tolist()
+        self.latest_scan = copy.deepcopy(msg)
 
     # define goal callback:
     def goal_callback(self, goal_request : NavigateToGoal):
