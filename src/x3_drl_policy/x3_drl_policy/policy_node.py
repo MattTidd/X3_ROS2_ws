@@ -211,9 +211,6 @@ class DRLPolicyNode(Node):
                                if goal_handle.request.goal_tolerance > 0.0
                                else self.default_goal_tolerance)
 
-        # apply obstacle tolerance:
-        self.obstacle_tolerance = self.default_obstacle_tolerance
-
         # start timer for control loop:
         start = time.time()
 
@@ -394,7 +391,7 @@ class DRLPolicyNode(Node):
     def _yaw_from_quaternion(self, q: Quaternion) -> float:
         siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
         cosy_cosp = 1.0 - 2.0 * (q.y**2 + q.z**2)
-        return np.atan2(siny_cosp, cosy_cosp, dtype = np.float32)
+        return np.arctan2(siny_cosp, cosy_cosp, dtype = np.float32)
 
     # define function for getting the observation:
     def _get_obs(self, odom: Odometry, target: PoseStamped, scan : LaserScan) -> np.ndarray:
