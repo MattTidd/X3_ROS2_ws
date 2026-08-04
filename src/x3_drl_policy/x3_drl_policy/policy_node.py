@@ -9,10 +9,10 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy
 from x3_nav_interfaces.action import NavigateToGoal
 
-import numpy as numpy
+import numpy as np
 import torch, torch.nn as nn
 import gymnasium as gym
-from stable_baselines3 import SAC
+from stable_baselines3.sac.policies import Actor
 
 from ament_index_python.packages import get_package_share_directory
 import os
@@ -28,6 +28,9 @@ class DRLPolicyNode(Node):
     def __init__(self):
         # inherit from parent class:
         super().__init__("drl_policy_server")
+
+        # log to user that node is starting:
+        self.get_logger().info("Starting DRL policy node...")
 
         # declare parameters:
         self.declare_parameter("agent_name", "agent1")
@@ -51,29 +54,43 @@ class DRLPolicyNode(Node):
         self.goal_timeout       = self.get_parameter('goal_timeout').value
 
         # get the paths:
-        pkg_dir        = get_package_share_directory("x3_drl_policy")
-        model_dir      = os.path.join(pkg_dir, "policies", self.model_name)
-        model_path     = os.path.join(model_dir, "model")
-        norm_stat_path = os.path.join(model_dir, "norm_stats.pkl")
+        pkg_dir            = get_package_share_directory("x3_drl_policy")
+        model_dir          = os.path.join(pkg_dir, "policies", self.model_name)
+        policy_weight_path = os.path.join(model_dir, "actor_weights.pt")
+        norm_stat_path     = os.path.join(model_dir, "norm_stats.npz")
 
         # enable the use of cuda if available:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # load the model, if available:
-        try:
-            model = SAC.load(model_path, device = self.device)
-        except FileNotFoundError:
-            self.get_logger().info("No model found!")
-            sys.exit(0)
+        # load norm stats:
+        norm = np.load(norm_stat_path)
+        self.obs_mean = norm['mean'].astype(np.float32)
+        self.obs_var  = norm['var'].astype(np.float32)
+        self.clip_obs = float(norm["clip_obs"])
 
-        # get the policy from the model, set to evaluation (inference):
-        self.policy = model.policy.actor
+        # load the actor network:
+        self.policy = Actor(
+            observation_space  = gym.spaces.Box(low = -np.inf, high = np.inf, shape = (27,), dtype = np.float64),
+            action_space       = gym.spaces.Box(low = np.array([0.0, -1.0]), high = np.array([1.0, 1.0]), dtype = np.float64),
+            net_arch           = [512, 256],
+            features_extractor = torch.nn.Identity(),
+            features_dim       = 27,
+            activation_fn      = torch.nn.ReLU,
+            normalize_images   = False,
+        ).to(self.device)
+        state = torch.load(policy_weight_path, map_location = self.device)
+        self.policy.load_state_dict(state)
         self.policy.eval()
 
-        # load the observation normalization stats:
-        with open(norm_stat_path, "rb") as f:
-            self.vec_norm = pickle.load(f)
-        self.vec_norm.training = False
+        # try:
+        #     model = SAC.load(model_path, device = self.device)
+        # except FileNotFoundError:
+        #     self.get_logger().info("No model found!")
+        #     sys.exit(0)
+
+        # # get the policy from the model, set to evaluation (inference):
+        # self.policy = model.policy.actor
+        # self.policy.eval()
 
         # set size of observation space:
         self.n_ray_groups    = 18
@@ -122,7 +139,7 @@ class DRLPolicyNode(Node):
         )
 
         # log to user what policy is being used:
-        self.get_logger().info(f"Running DRL policy - {self.model_name}")
+        self.get_logger().info(f"Running DRL policy - {self.model_name} using - {self.device}")
 
     # define odometry callback:
     def odom_callback(self, msg : Odometry):
@@ -446,14 +463,11 @@ class DRLPolicyNode(Node):
 
     # define function for normalizing observations:
     def _normalize_obs(self, obs: np.ndarray) -> np.ndarray:
-        # reshape because vecnormalize expects a batch dimension representing parallel environments:
-        obs_batch = obs.reshape(1,-1)
-
         # normalize:
-        obs_normalized = self.vec_norm.normalize_obs(obs_batch)
+        obs_normed = (obs - self.obs_mean) / np.sqrt(self.obs_var + 1e-8)
 
         # return normalized observation:
-        return obs_normalized.reshape(-1).astype(np.float32)
+        return np.clip(obs_normed, -self.clip_obs, self.clip_obs).astype(np.float32)
 
     # define function for getting rewards:
     def _get_rewards(self, obs):
