@@ -33,7 +33,7 @@ class DRLPolicyNode(Node):
         self.declare_parameter("agent_name", "agent1")
         self.declare_parameter("goal_tolerance", 0.5)
         self.declare_parameter("obstacle_tolerance", 0.21)
-        self.declare_parameter("model_name", "SAC_001")
+        self.declare_parameter("model_name", "SAC_132")
         self.declare_parameter("agent_initial_yaw", 0.0)
         self.declare_parameter('max_lin_vel', 0.4)
         self.declare_parameter('max_angular_vel', 0.6)
