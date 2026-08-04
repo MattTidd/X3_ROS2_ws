@@ -29,7 +29,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "bt_node = x3_bt_handler.bt_node:main"
+            "bt_handler_node = x3_bt_handler.bt_node:main"
         ],
     },
 )
