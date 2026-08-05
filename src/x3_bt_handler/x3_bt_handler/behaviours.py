@@ -165,9 +165,6 @@ class SubmitBid(py_trees.behaviour.Behaviour):
 
         :param bid_published: A boolean flag to track whether a bid has been published or not.
         :type bid_published: bool
-
-        :param last_goal_id: A variable to track whether the current goal differs from the last goal.
-        :type last_goal_id: None
         
         """
         # inherit from parent class:
@@ -179,7 +176,6 @@ class SubmitBid(py_trees.behaviour.Behaviour):
         self.model_path    = os.path.join(model_path, "model.pth")
         self.scaler_path   = os.path.join(model_path, "scaler.pkl")
         self.bid_published = False
-        self.last_goal_id  = None
 
     # define method for setting up the model:
     def setup(self, **kwargs):
@@ -209,21 +205,6 @@ class SubmitBid(py_trees.behaviour.Behaviour):
         # if failing to load:
         except Exception as e:
             self.node.get_logger().error(f"Failed to load suitability model: {e}")
-
-    # define method for initializing:
-    def initialise(self):
-        """
-        Initialise method of the behaviour, which is used to perform initialization before commencing the operation of the behaviour. 
-
-        - It is called on the first tick of the behaviour, and anytime thereafter when the status is not ``py_trees.common.Status.RUNNING``.
-
-        - Specifically, this method resets the ``bid_published`` flag and updates the ``last_goal`` value, only when the goal has changed.
-        """
-        # reset only if the goal ID has changed:
-        if self.node.goal_id != self.last_goal_id:
-            # flip bid published flag and increment ID:
-            self.bid_published = False
-            self.last_goal_id  = self.node.goal_id
     
     # define update method:
     def update(self):
@@ -236,6 +217,10 @@ class SubmitBid(py_trees.behaviour.Behaviour):
         :returns: ``py_trees.common.Status.FAILURE`` if the suitability model was not loaded, ``py_trees.common.Status.RUNNING`` if still waiting on agent odom or a goal, and
         ``py_trees.common.Status.SUCCESS`` upon publishing a bid.
         """
+        # check for differing goal ids:
+        if self.node.goal_id != self.node.bid_goal_id:
+            self.bid_published = False
+
         # if there is a published bid, just return success:
         if self.bid_published:
             return py_trees.common.Status.SUCCESS
@@ -285,6 +270,7 @@ class SubmitBid(py_trees.behaviour.Behaviour):
         self.node.get_logger().info(f"{self.node.agent_name} suitability: {self.node.suitability:.4f} | type: {self.node.agent_type} | TDT: {round(self.node.total_distance, 3)} | LH: {self.node.load_history} | DTT: {round(d_goal, 3)}")
 
         # publish the bid:
+        self.node.bid_goal_id = self.node.goal_id
         self.node.publish_bid(self.node.suitability)
         self.bid_published = True
 
