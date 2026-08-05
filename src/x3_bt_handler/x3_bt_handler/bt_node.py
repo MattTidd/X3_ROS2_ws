@@ -97,6 +97,8 @@ class BTNode(Node):
         self.load_history:          float                       =       0.0         # load history (number of tasks completed thus far)
         self.suitability:           float                       =       0.0         # suitability for the task at hand
         self.all_bids:              dict                        =       {}          # dictionary of form {agent_name : suitability_score}
+        self.goal_id:               str                         =       ""          # id for goals
+        self.bid_goal_id:           str                         =       ""          # id for the goal being bid on
         self.simulation_started:    bool                        =       False       # flag for whether the simulation has started or not
         self.new_goal:              bool                        =       False       # flag for whether a new goal has arrived or not
         self.nav_failed:            bool                        =       False       # flag for navigational success
@@ -193,9 +195,6 @@ class BTNode(Node):
             self.new_goal = False
             return
 
-        # let the user know that the goal has been received:
-        self.get_logger().info(f"Goal received at: ({msg.pose.pose.position.x:.2f}, {msg.pose.pose.position.y:.2f})")
-
         # add the goal pose to the class:
         self.goal = msg.pose
 
@@ -204,6 +203,9 @@ class BTNode(Node):
 
         # add the goal id to the class:
         self.goal_id = msg.id
+
+        # let the user know that the goal has been received:
+        self.get_logger().info(f"{self.goal_id} received at: ({msg.pose.pose.position.x:.2f}, {msg.pose.pose.position.y:.2f})")
         
         # reset rebroadcast counter on fresh goals:
         if "_rebroadcast" not in msg.id:
@@ -283,8 +285,14 @@ class BTNode(Node):
         :param msg: Mission complete message that is subscribed to
         :type msg: String
         """
+        # reset the goal id:
+        self.goal_id = ""
+
+        # reset the bid goal id:
+        self.bid_goal_id = ""
+
         # debug at the end of a mission:
-        self.get_logger().info(f"{self.agent_name} | TDT: {round(self.total_distance), 3} | LH: {self.load_history}")
+        self.get_logger().info(f"{self.agent_name} | TDT: {round(self.total_distance, 3)} | LH: {self.load_history}")
 
         # instantiate a blank metric message:
         metrics = AgentMetrics()
@@ -292,10 +300,11 @@ class BTNode(Node):
         # populate the metrics message:
         metrics.agent_name     = self.agent_name
         metrics.total_distance = self.total_distance
-        metrics.load_history   = self.load_history
+        metrics.load_history   = int(self.load_history)
         metrics.collisions     = self.collision_count
         metrics.timeouts       = self.timeout_count
 
+        # publish the metrics:
         self.metrics_pub.publish(metrics)
 
     # define method for publishing a bid:
