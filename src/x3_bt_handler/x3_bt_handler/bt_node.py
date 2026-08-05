@@ -71,7 +71,7 @@ class BTNode(Node):
         self.declare_parameter("agent_initial_x", 0.0)
         self.declare_parameter("agent_initial_y", 0.0)
         self.declare_parameter("agent_initial_yaw", 0.0)
-        self.declare_parameter("drl_model", "SAC_132")
+        self.declare_parameter("drl_model", "SAC_099")
         self.declare_parameter("num_agents", 2)
         self.declare_parameter("model_path", "")
         self.declare_parameter("goal_tolerance", 0.20)

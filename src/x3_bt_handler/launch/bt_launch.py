@@ -56,7 +56,7 @@ def generate_launch_description():
     drl_model = LaunchConfiguration("drl_model")
     drl_model_arg = DeclareLaunchArgument(
         "drl_model",
-        default_value = "SAC_132",
+        default_value = "SAC_099",
         description   = "DRL model to be used for the navigational policy"
     )
 

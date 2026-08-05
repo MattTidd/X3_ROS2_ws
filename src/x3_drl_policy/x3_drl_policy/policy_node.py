@@ -36,7 +36,7 @@ class DRLPolicyNode(Node):
         self.declare_parameter("agent_name", "agent1")
         self.declare_parameter("goal_tolerance", 0.5)
         self.declare_parameter("obstacle_tolerance", 0.21)
-        self.declare_parameter("model_name", "SAC_132")
+        self.declare_parameter("model_name", "SAC_099")
         self.declare_parameter("agent_initial_yaw", 0.0)
         self.declare_parameter('max_lin_vel', 0.4)
         self.declare_parameter('max_angular_vel', 0.6)
@@ -341,7 +341,7 @@ class DRLPolicyNode(Node):
                 # f'\n(theta={p.arctan2(obs[4], obs[3])/np.pi*180: 5.2f} | phi={np.arctan2(obs[6], obs[5])/np.pi*180: 5.2f})'
                 # f'\n(vx={obs[7]: 5.3f} | vyaw={obs[8]: 5.3f})'
                 f'\nMin LiDAR group idx: {np.argmin(obs[9:])} | {np.min(obs[9:])}'
-                f'\nlidar:{obs[9:]}'
+                # f'\nlidar:{obs[9:]}'
                 # f'Policy action: {self.action[0]:5.3f}, {self.action[1]:5.3f}'
             )
 
