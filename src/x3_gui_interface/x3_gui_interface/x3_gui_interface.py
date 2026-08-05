@@ -2,6 +2,7 @@
 from ament_index_python.packages import get_package_share_directory
 from x3_nav_interfaces.msg import Goal, AgentMetrics
 from std_msgs.msg import String, Bool 
+from visualization_msgs.msg import Marker 
 from rclpy.node import Node
 import numpy as np
 import subprocess
@@ -56,6 +57,7 @@ class X3GuiInterface(Node):
         self.goal_pub             = self.create_publisher(Goal, "/goal", 10)
         self.start_pub            = self.create_publisher(String, "/simulation_start", 10)
         self.mission_complete_pub = self.create_publisher(String, "/mission_complete", 10)
+        self.marker_pub           = self.create_publisher(Marker, "/goal_marker", 10)
 
         # define variables for storage:
         self.makespan           = 0
@@ -405,6 +407,13 @@ class MainWindow(QWidget):
             self.button_handling.emit()
             return
 
+        # send message to clear previous goal marker:
+        msg                 = Marker()
+        msg.header.frame_id = "odom"
+        msg.header.stamp    = self.node.get_clock().now().to_msg()
+        msg.action          = Marker.DELETEALL
+        self.node.marker_pub.publish(msg)
+
         # otherwise, pop the first item from the goal queue:
         key        = next(iter(self.goal_queue))
         goal_data = self.goal_queue.pop(key)
@@ -421,9 +430,27 @@ class MainWindow(QWidget):
         msg.pose.pose.position.y    = goal_data[2]
         msg.pose.pose.position.z    = 0.0
         msg.pose.pose.orientation.w = 1.0
-
-        # publish:
         self.node.goal_pub.publish(msg)
+
+        # build and publish the marker message:
+        msg = Marker()
+        msg.header.frame_id    = "odom"
+        msg.header.stamp       = self.node.get_clock().now().to_msg()
+        msg.pose.position.x    = goal_data[1]
+        msg.pose.position.y    = goal_data[2]
+        msg.pose.position.z    = 0.25
+        msg.pose.orientation.y = 0.7071 
+        msg.pose.orientation.w = 0.7071
+        msg.type               = Marker.ARROW
+        msg.action             = Marker.ADD
+        msg.scale.x            = 0.25
+        msg.scale.y            = 0.05
+        msg.scale.z            = 0.05
+        msg.color.r            = 0.0
+        msg.color.g            = 0.0
+        msg.color.b            = 1.0
+        msg.color.a            = 1.0
+        self.node.marker_pub.publish(msg)
         print(f"Goal published at: ({goal_data[1]}, {goal_data[2]}) with type: {goal_data[0]}!")
 
 # define main execution of node:
