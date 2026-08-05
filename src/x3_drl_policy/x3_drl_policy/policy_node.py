@@ -35,7 +35,7 @@ class DRLPolicyNode(Node):
         # declare parameters:
         self.declare_parameter("agent_name", "agent1")
         self.declare_parameter("goal_tolerance", 0.5)
-        self.declare_parameter("obstacle_tolerance", 0.21)
+        self.declare_parameter("obstacle_tolerance", 0.26)
         self.declare_parameter("model_name", "SAC_099")
         self.declare_parameter("agent_initial_yaw", 0.0)
         self.declare_parameter('max_lin_vel', 0.4)
@@ -440,7 +440,7 @@ class DRLPolicyNode(Node):
         # LiDAR min-pooling:
         raw                = np.array(scan.ranges, dtype = np.float32)
         raw                = np.where(np.isfinite(raw), raw, scan.range_max)    # replace inf/nan with max LiDAR range values
-        antennae_mask      = raw < 0.20
+        antennae_mask      = raw < 0.25
         raw[antennae_mask] = scan.range_max                                     # drop anything below the minimum LiDAR scan range 
         raw                = np.clip(raw, 0.0, scan.range_max)
         raw                = np.flip(raw)
