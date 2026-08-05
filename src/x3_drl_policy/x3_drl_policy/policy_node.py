@@ -336,14 +336,14 @@ class DRLPolicyNode(Node):
             self._get_rewards(obs)
 
             # # --- Debug prints ---
-            self.get_logger().info(
+            # self.get_logger().info(
                 # f'obs → (dx={obs[0]: 5.3f} | dy={obs[1]: 5.3f} | dg={obs[2]: 5.3f})'
                 # f'\n(theta={p.arctan2(obs[4], obs[3])/np.pi*180: 5.2f} | phi={np.arctan2(obs[6], obs[5])/np.pi*180: 5.2f})'
                 # f'\n(vx={obs[7]: 5.3f} | vyaw={obs[8]: 5.3f})'
-                f'\nMin LiDAR group idx: {np.argmin(obs[9:])} | {np.min(obs[9:])}'
+                # f'\nMin LiDAR group idx: {np.argmin(obs[9:])} | {np.min(obs[9:])}'
                 # f'\nlidar:{obs[9:]}'
                 # f'Policy action: {self.action[0]:5.3f}, {self.action[1]:5.3f}'
-            )
+            # )
 
             # prepare the cmd_vel message:
             cmd                 = TwistStamped()
