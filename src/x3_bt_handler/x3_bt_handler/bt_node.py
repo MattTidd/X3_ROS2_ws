@@ -136,6 +136,9 @@ class BTNode(Node):
                 lambda msg, n = name: self._bid_callback(msg, n), 10
             )
 
+        # subscriber for mission complete signal:
+        self.metrics_sub = self.create_subscription(String, "/mission_complete", self._mission_complete_callback, 10)
+
         ##### create publishers: #####
         # cmd_vel publisher:
         self.cmd_vel_pub = self.create_publisher(TwistStamped, f"/{self.agent_name}/cmd_vel", 10)
@@ -145,6 +148,9 @@ class BTNode(Node):
 
         # publisher for the goal:
         self.goal_pub = self.create_publisher(Goal, "/goal", 10)
+
+        # publisher for the metrics:
+        self.metrics_pub = self.create_publisher(AgentMetrics, f"/agent_metrics", 10)
 
         ##### build and start the behaviour tree: #####
         self.tree = create_tree(node = self, model_path = self.model_path)
@@ -267,6 +273,30 @@ class BTNode(Node):
 
         # not going to do the else branch here, just going to shut down the nodes manually and restart them
         # if I want to reset
+
+    # define the mission complete callback method:
+    def _mission_complete_callback(self, msg : String):
+        """
+        Mission complete callback used by the mission complete subscriber. Publishes the metrics of the agent, 
+        so that they may be collated by the GUI node and saved for analysis.
+
+        :param msg: Mission complete message that is subscribed to
+        :type msg: String
+        """
+        # debug at the end of a mission:
+        self.get_logger().info(f"{self.agent_name} | TDT: {round(self.total_distance), 3} | LH: {self.load_history}")
+
+        # instantiate a blank metric message:
+        metrics = AgentMetrics()
+
+        # populate the metrics message:
+        metrics.agent_name     = self.agent_name
+        metrics.total_distance = self.total_distance
+        metrics.load_history   = self.load_history
+        metrics.collisions     = self.collision_count
+        metrics.timeouts       = self.timeout_count
+
+        self.metrics_pub.publish(metrics)
 
     # define method for publishing a bid:
     def publish_bid(self, suitability : float):
