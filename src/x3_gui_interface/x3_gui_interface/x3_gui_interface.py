@@ -97,7 +97,7 @@ class X3GuiInterface(Node):
         }
 
         # dump metrics to CSV if all are in:
-        if len(self.agent_metrics) == len(self.num_agents):
+        if len(self.agent_metrics) == self.num_agents:
             self._write_metrics()
 
     # define a method for writing metrics to CSV:
