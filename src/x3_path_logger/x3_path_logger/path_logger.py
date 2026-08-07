@@ -20,7 +20,7 @@ class PathLoggerNode(Node):
         self.declare_parameter("num_agents", 2)
         self.declare_parameter("path_name", "path1")
         self.declare_parameter("goal_tolerance", 0.3)
-        self.declare_parmaeter("save_dir", os.path.join(os.path.expanduser("~"), "recorded_paths"))
+        self.declare_parameter("save_dir", os.path.join(os.path.expanduser("~"), "recorded_paths"))
 
         # add parameters to the class:
         self.num_agents     = self.get_parameter("num_agents").value
