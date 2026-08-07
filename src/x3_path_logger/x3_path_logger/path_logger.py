@@ -5,7 +5,7 @@ import math
 import rclpy
 import datetime
 from rclpy.node import Node
-from rclpy.paramter import Parameter
+from rclpy.parameter import Parameter
 from nav_msgs.msg import Odometry
 from std_msgs.msg import String
 from tf_transformations import euler_from_quaternion
