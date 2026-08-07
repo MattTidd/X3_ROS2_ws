@@ -8,7 +8,6 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter
 from nav_msgs.msg import Odometry
 from std_msgs.msg import String
-from tf_transformations import euler_from_quaternion
 
 # class for the node:
 class PathLoggerNode(Node):
@@ -51,6 +50,13 @@ class PathLoggerNode(Node):
         # let user know logger is working:
         self.get_logger().info(f"PathLoggerNode ready | agents: {self.num_agents} | path: {self.path_name}")
 
+    # method for getting yaw from quaternion:
+    def _yaw_from_quaternion(self, q):
+        # calcuate and return yaw:
+        siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+        cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+        return math.atan2(siny_cosp, cosy_cosp)
+
     # odometry callback:
     def _odom_callback(self, msg: Odometry, agent_id: int):
         # form agent name key for dict indexing:
@@ -68,8 +74,7 @@ class PathLoggerNode(Node):
         x = msg.pose.pose.position.x
         y = msg.pose.pose.position.y
 
-        q = msg.pose.pose.orientation
-        _, _, yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
+        yaw = self._yaw_from_quaternion(msg.pose.pose.orientation)
 
         # accumulate distance:
         if self.last_pos[key] is not None:
