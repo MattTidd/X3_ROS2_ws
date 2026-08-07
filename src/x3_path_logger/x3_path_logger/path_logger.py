@@ -50,7 +50,7 @@ class PathLoggerNode(Node):
             self.create_subscription(
                 Bool,
                 f"/agent{i}/start_logging",
-                lambda msg, agent_id = i, self._start_logging_callback(msg, agent_id),
+                lambda msg, agent_id = i: self._start_logging_callback(msg, agent_id),
                 10
             )
 
@@ -58,7 +58,7 @@ class PathLoggerNode(Node):
             self.create_subscription(
                 Bool,
                 f"/agent{i}/stop_logging",
-                lambda msg, agent_id = i, self._stop_logging_callback(msg, agent_id),
+                lambda msg, agent_id = i: self._stop_logging_callback(msg, agent_id),
                 10
             )
 
