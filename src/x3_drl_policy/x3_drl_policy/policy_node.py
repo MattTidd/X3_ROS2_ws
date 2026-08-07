@@ -10,9 +10,9 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy
 from x3_nav_interfaces.action import NavigateToGoal
 
 import numpy as np
-import torch, torch.nn as nn
-import gymnasium as gym
-from stable_baselines3.sac.policies import Actor
+import torch, torch.nn as nn                        # type: ignore
+import gymnasium as gym                             # type: ignore
+from stable_baselines3.sac.policies import Actor    # type: ignore
 
 from ament_index_python.packages import get_package_share_directory
 import os

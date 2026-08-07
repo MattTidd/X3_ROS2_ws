@@ -6,9 +6,9 @@ import time
 from rclpy.node import Node
 from pickle import load
 
-import torch                
-import torch.nn as nn       
-import torch.optim as optim 
+import torch                    # type: ignore
+import torch.nn as nn           # type: ignore
+import torch.optim as optim     # type: ignore
 
 # define class for the model to be loaded:
 class RegressionNet(nn.Module):
