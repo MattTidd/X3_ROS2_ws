@@ -7,7 +7,7 @@ import datetime
 from rclpy.node import Node
 from rclpy.parameter import Parameter
 from nav_msgs.msg import Odometry
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool
 
 # class for the node:
 class PathLoggerNode(Node):
@@ -29,6 +29,7 @@ class PathLoggerNode(Node):
         self.save_dir       = self.get_parameter("save_dir").value
 
         # initialize the per-agent stats:
+        self.logging_active = {f"agent{i}" : False for i in range(1, self.num_agents + 1)}
         self.poses          = {f"agent{i}" : [] for i in range(1, self.num_agents + 1)}
         self.start_time     = {f"agent{i}" : None for i in range(1, self.num_agents + 1)}
         self.last_pos       = {f"agent{i}" : None for i in range(1, self.num_agents + 1)}
@@ -41,6 +42,15 @@ class PathLoggerNode(Node):
                 Odometry,
                 f"/agent{i}/odom",
                 lambda msg, agent_id = i: self._odom_callback(msg, agent_id),
+                10
+            )
+
+        # logging subscriber:
+        for i in range(1, self.num_agents + 1):
+            self.create_subscription(
+                Bool,
+                f"/agent{i}/start_logging",
+                lambda msg, agent_id = i, self._start_logging_callback(msg, agent_id),
                 10
             )
 
@@ -57,10 +67,24 @@ class PathLoggerNode(Node):
         cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
         return math.atan2(siny_cosp, cosy_cosp)
 
+    # start logging callback:
+    def _start_logging_callback(self, msg: Bool, agent_id: int):
+        # form agent name key for dict indexing:
+        key = f"agent{agent_id}"
+
+        # check to see if the agent won the auction:
+        if msg.data:
+            self.logging_active[key] = True
+            self.get_logger().info(f"{key} won the auction - logging started")
+
     # odometry callback:
     def _odom_callback(self, msg: Odometry, agent_id: int):
         # form agent name key for dict indexing:
         key = f"agent{agent_id}"
+
+        # check to see if the agent should be actively logging:
+        if not self.logging_active[key]:
+            return
 
         # get current time:
         now = self.get_clock().now().nanoseconds * 1e-9
