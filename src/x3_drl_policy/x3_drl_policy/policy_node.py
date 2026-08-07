@@ -35,7 +35,7 @@ class DRLPolicyNode(Node):
         # declare parameters:
         self.declare_parameter("agent_name", "agent1")
         self.declare_parameter("goal_tolerance", 0.5)
-        self.declare_parameter("obstacle_tolerance", 0.21)
+        self.declare_parameter("obstacle_tolerance", 0.15)
         self.declare_parameter("model_name", "SAC_099")
         self.declare_parameter("agent_initial_yaw", 0.0)
         self.declare_parameter('max_lin_vel', 0.33)
@@ -441,7 +441,7 @@ class DRLPolicyNode(Node):
         raw                = np.array(scan.ranges, dtype = np.float32)
         raw                = np.where(np.isfinite(raw), raw, scan.range_max)    # replace inf/nan with max LiDAR range values
         # antennae_mask      = raw < 0.20
-        raw[1400:1900]     = scan.range_max                     # this range corresponds to the board stack (I think), so I'm masking it
+        raw[1350:1950]     = scan.range_max                     # this range corresponds to the board stack (I think), so I'm masking it
         raw                = np.clip(raw, 0.0, scan.range_max)
         raw                = np.flip(raw)
         n_groups           = 18         
