@@ -5,6 +5,7 @@ import os
 import time
 from rclpy.node import Node
 from pickle import load
+from std_msgs.msg import Bool
 
 import torch                    # type: ignore
 import torch.nn as nn           # type: ignore
@@ -461,6 +462,11 @@ class NavigateToGoal(py_trees.behaviour.Behaviour):
         :returns: ``py_trees.common.Status.FAILURE``, ``py_trees.common.Status.RUNNING``, or ``py_trees.common.Status.SUCCESS``, depending
         on the state of the agent.
         """
+        # publish the start logging signal:
+        msg = Bool()
+        msg.data = True
+        self.node.start_logging_pub.publish(msg)
+
         # if there is either no goal or no odometry coming in:
         if self.node.latest_odom is None or self.node.goal is None:
             self.node.get_logger().info("No odom or latest goal")
@@ -472,6 +478,11 @@ class NavigateToGoal(py_trees.behaviour.Behaviour):
             self.node.get_logger().warn(
                 f"{self.node.agent_name}: navigation reported failure by goal client"
             )
+
+            # stop logging:
+            msg = Bool()
+            msg.data = False
+            self.node.stop_logging_pub.publish(msg)
 
             # reset flag to prevent retriggering:
             self.node.nav_failed = False
@@ -486,6 +497,11 @@ class NavigateToGoal(py_trees.behaviour.Behaviour):
         if self._start_time is not None and (time.time() - self._start_time) > self.timeout:
             # log to user:
             self.node.get_logger().warn(f"{self.node.agent_name} navigation timed out.")
+
+            # stop logging:
+            msg = Bool()
+            msg.data = False
+            self.node.stop_logging_pub.publish(msg)
 
             # increment timeout counter:
             self.node.timeout_count += 1
@@ -514,6 +530,11 @@ class NavigateToGoal(py_trees.behaviour.Behaviour):
 
         # check d_goal for completion:
         if d_goal <= self.node.goal_tolerance:
+            # stop logging:
+            msg = Bool()
+            msg.data = True
+            self.node.stop_logging_pub.publish(msg)
+
             # increment load history:
             self.node.load_history += 1.0
 

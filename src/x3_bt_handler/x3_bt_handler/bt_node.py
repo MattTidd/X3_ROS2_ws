@@ -151,6 +151,10 @@ class BTNode(Node):
         # publisher for the goal:
         self.goal_pub = self.create_publisher(Goal, "/goal", 10)
 
+        # publishers for logging:
+        self.start_logging_pub = self.create_publisher(Bool, f"/{self.agent_name}/start_logging", 10)
+        self.stop_logging_pub  = self.create_publisher(Bool, f"/{self.agent_name}/stop_logging", 10)
+
         # publisher for the metrics:
         self.metrics_pub = self.create_publisher(AgentMetrics, f"/agent_metrics", 10)
 

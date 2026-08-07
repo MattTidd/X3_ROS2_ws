@@ -45,12 +45,20 @@ class PathLoggerNode(Node):
                 10
             )
 
-        # logging subscriber:
+        # logging subscribers:
         for i in range(1, self.num_agents + 1):
             self.create_subscription(
                 Bool,
                 f"/agent{i}/start_logging",
                 lambda msg, agent_id = i, self._start_logging_callback(msg, agent_id),
+                10
+            )
+
+        for i in range(1, self.num_agents + 1):
+            self.create_subscription(
+                Bool,
+                f"/agent{i}/stop_logging",
+                lambda msg, agent_id = i, self._stop_logging_callback(msg, agent_id),
                 10
             )
 
@@ -72,10 +80,32 @@ class PathLoggerNode(Node):
         # form agent name key for dict indexing:
         key = f"agent{agent_id}"
 
-        # check to see if the agent won the auction:
-        if msg.data:
+        # reset agent and start logging:
+        if msg.data and not self.logging_active[key]:
+            self.poses[key]          = []
+            self.start_time[key]     = None
+            self.last_pos[key]       = None
+            self.total_dist[key]     = 0.0
             self.logging_active[key] = True
             self.get_logger().info(f"{key} won the auction - logging started")
+
+    # stop logging callback:
+    def _stop_logging_callback(self, msg: Bool, agent_id: int):
+        # form agent name key for dict indexing:
+        key = f"agent{agent_id}"
+
+        # stop logging:
+        self.logging_active[key] = False
+
+        # handle resetting if needed:
+        if msg.data:
+            self.get_logger().info(f'{key} successfully reached goal')
+        else:
+            self.poses[key]          = []
+            self.start_time[key]     = None
+            self.last_pos[key]       = None
+            self.total_dist[key]     = 0.0
+            self.get_logger().info(f'{key} failed/timed out — poses discarded')
 
     # odometry callback:
     def _odom_callback(self, msg: Odometry, agent_id: int):
