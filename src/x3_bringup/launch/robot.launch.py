@@ -111,8 +111,9 @@ def generate_launch_description():
             "serial_baudrate"  : 1000000,
             "frame_id"         : lidar_frame,
             "inverted"         : False,
+            "flip_x_axis"      : True,
             "angle_compensate" : True,
-            "scan_mode"        : "DenseBoost"
+            "scan_mode"        : "Standard"
         }]
     )
 
