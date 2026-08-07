@@ -34,7 +34,7 @@ class DRLPolicyNode(Node):
 
         # declare parameters:
         self.declare_parameter("agent_name", "agent1")
-        self.declare_parameter("goal_tolerance", 0.5)
+        self.declare_parameter("goal_tolerance", 0.3)
         self.declare_parameter("obstacle_tolerance", 0.15)
         self.declare_parameter("model_name", "SAC_099")
         self.declare_parameter("agent_initial_yaw", 0.0)
