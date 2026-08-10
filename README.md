@@ -4,7 +4,9 @@ Practical implementation of a developed methodology for performing task allocati
 ## Usage:
 To launch a given agent within the MRS, the following can be run in the command line:
 
-``ros2 launch x3_bringup robot.launch.py``
+```bash
+ros2 launch x3_bringup robot.launch.py
+```
 
 Where the following arguments are accepted:
 
@@ -19,7 +21,9 @@ Where the following arguments are accepted:
 
 For launching a single agent, an example usage would then be:
 
-``ros2 launch x3_bringup robot.launch.py agent_name:=agent1 agent_type:=typeA agent_initial_x:=0.0 agent_initial_y:=0.0 agent_initial_yaw:=0.0 num_agents:=1 drl_model:=SAC_099``
+```bash
+ros2 launch x3_bringup robot.launch.py agent_name:=agent1 agent_type:=typeA agent_initial_x:=0.0 agent_initial_y:=0.0 agent_initial_yaw:=0.0 num_agents:=1 drl_model:=SAC_099
+```
 
 
 ## Project Structure:
