@@ -32,7 +32,7 @@ def load_agent_json(mission_dir: str) -> dict:
     return data
 
 # set directory to the paths:
-mission_name = "path1_070826_1723"
+mission_name = "mission_1"
 mission_dir  = os.path.join(os.path.expanduser("~"), "X3_ROS2_ws", "scripts", "recorded_paths", mission_name)
 
 # define initial odometry of agents used:
