@@ -8,6 +8,7 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter
 from nav_msgs.msg import Odometry
 from std_msgs.msg import String, Bool
+from x3_nav_interfaces.msg import Goal
 
 # class for the node:
 class PathLoggerNode(Node):
@@ -25,7 +26,7 @@ class PathLoggerNode(Node):
         self.num_agents     = self.get_parameter("num_agents").value
         self.goal_tolerance = self.get_parameter("goal_tolerance").value
         self.save_dir       = self.get_parameter("save_dir").value
-        self.mission_name   = f"mission_{len(os.listdir(self.save_dir)) + 1}"
+        self.mission_name   = f"mission_{len(os.listdir(self.save_dir))}"
 
         # initialize the per-agent stats:
         self.logging_active = {f"agent{i}" : False for i in range(1, self.num_agents + 1)}
@@ -33,7 +34,16 @@ class PathLoggerNode(Node):
         self.start_time     = {f"agent{i}" : None for i in range(1, self.num_agents + 1)}
         self.last_pos       = {f"agent{i}" : None for i in range(1, self.num_agents + 1)}
         self.total_dist     = {f"agent{i}" : 0.0 for i in range(1, self.num_agents + 1)}
+        self.goals          = {}
         self.mission_saved  = False
+
+        # goal subscriber:
+        self.create_subscription(
+            Goal, 
+            "/goal",
+            self._goal_callback, 
+            10
+        )
 
         # odometry subscriber:
         for i in range(1, self.num_agents + 1):
@@ -146,6 +156,18 @@ class PathLoggerNode(Node):
             "yaw" : round(yaw, 4) 
         })
 
+    # goal callback:
+    def _goal_callback(self, msg: Goal):
+        # grab information from goal topic:
+        goal_name = msg.id
+        if goal_name != "":
+            goal_x    = msg.pose.pose.position.x
+            goal_y    = msg.pose.pose.position.y
+            goal_type = msg.required_capability
+
+            # populate the dict pertaining to the goals:
+            self.goals[goal_name] = {"type": goal_type, "x" : goal_x, "y" : goal_y}
+
     # mission complete callback:
     def _mission_complete_callback(self, msg: String):
         # check value of msg:
@@ -159,7 +181,7 @@ class PathLoggerNode(Node):
         mission_dir = os.path.join(self.save_dir, f"{self.mission_name}")
         os.makedirs(mission_dir, exist_ok = True)
 
-        # save data:
+        # save agent data:
         for i in range(1, self.num_agents + 1):
             # extract poses + elapsed time:
             poses = self.poses[f"agent{i}"]
@@ -181,6 +203,11 @@ class PathLoggerNode(Node):
 
             # log to user that the agent was saved:
             self.get_logger().info(f"Saved agent{i} -> {filename}")
+
+        # save goal data:
+        filename = os.path.join(mission_dir, "goals.json")
+        with open(filename, "w") as f:
+            json.dump(self.goals, f, indent = 2)
 
 # define main function:
 def main():
