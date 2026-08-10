@@ -17,7 +17,7 @@ Where the following arguments are accepted:
 - ``num_agents``: Number of agents in the MRS.
 - ``drl_model``: Name of the DRL model to be used for the navigational policy.
 
-For launching a single agent, an example usage would then be:
+**For launching a single agent, an example usage would then be:**
 
 ```bash
 ros2 launch x3_bringup robot.launch.py agent_name:=agent1 agent_type:=typeA agent_initial_x:=0.0 agent_initial_y:=0.0 agent_initial_yaw:=0.0 num_agents:=1 drl_model:=SAC_099
@@ -31,7 +31,7 @@ Where the following argument is accepted:
 
 - ``num_agents``: Number of agents in the MRS.
 
-For use with a single agent, an example usage would then be:
+**For use with a single agent, an example usage would then be:**
 
 ```bash
 ros2 run x3_gui_interface x3_gui_interface --ros-args -p num_agents:=1
@@ -44,10 +44,10 @@ To log agent odometry, the following can be run in the command line:
 Which accepts the following arguments:
 
 - ``num_agents``: Number of agents in the MRS.
-- ``goal_tolerance``: Minimum different between current agent position and goal position for completion.
+- ``goal_tolerance``: Minimum difference between current agent position and goal position for completion.
 - ``save_dir``: Directory for saving the odometry of the agents.
 
-For use with a single agent, an example usage would then be:
+**For use with a single agent, an example usage would then be:**
 
 ```bash
 ros2 run x3_path_logger path_logger_node --ros-args -p num_agents:=1 -p goal_tolerance:=0.2
