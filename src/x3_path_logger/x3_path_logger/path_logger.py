@@ -30,9 +30,11 @@ class PathLoggerNode(Node):
 
         # initialize the per-agent stats:
         self.logging_active = {f"agent{i}" : False for i in range(1, self.num_agents + 1)}
-        self.poses          = {f"agent{i}" : [] for i in range(1, self.num_agents + 1)}
         self.start_time     = {f"agent{i}" : None for i in range(1, self.num_agents + 1)}
         self.last_pos       = {f"agent{i}" : None for i in range(1, self.num_agents + 1)}
+        self.per_goal_poses = {f"agent{i}" : [] for i in range(1, self.num_agents + 1)}
+        self.per_goal_dist  = {f"agent{i}" : 0.0 for i in range(1, self.num_agents + 1)}
+        self.total_poses    = {f"agent{i}" : [] for i in range(1, self.num_agents + 1)}
         self.total_dist     = {f"agent{i}" : 0.0 for i in range(1, self.num_agents + 1)}
         self.goals          = {}
         self.mission_saved  = False
@@ -91,10 +93,10 @@ class PathLoggerNode(Node):
 
         # reset agent and start logging:
         if msg.data and not self.logging_active[key]:
-            self.poses[key]          = []
+            self.per_goal_poses[key] = []
             self.start_time[key]     = None
             self.last_pos[key]       = None
-            self.total_dist[key]     = 0.0
+            self.per_goal_dist[key]  = 0.0
             self.logging_active[key] = True
             self.get_logger().info(f"{key} won the auction - logging started")
 
@@ -109,11 +111,13 @@ class PathLoggerNode(Node):
         # handle resetting if needed:
         if msg.data:
             self.get_logger().info(f'{key} successfully reached goal')
+            self.total_poses[key].append(self.per_goal_poses[key])
+            self.total_dist[key] += self.per_goal_dist[key]
         else:
-            self.poses[key]          = []
+            self.per_goal_poses[key] = []
             self.start_time[key]     = None
             self.last_pos[key]       = None
-            self.total_dist[key]     = 0.0
+            self.per_goal_dist[key]  = 0.0
             self.get_logger().info(f'{key} failed/timed out — poses discarded')
 
     # odometry callback:
@@ -143,13 +147,13 @@ class PathLoggerNode(Node):
         if self.last_pos[key] is not None:
             dx = x - self.last_pos[key][0]
             dy = y - self.last_pos[key][1]
-            self.total_dist[key] += math.sqrt(dx*dx + dy*dy)
+            self.per_goal_dist[key] += math.sqrt(dx*dx + dy*dy)
         
         # update last pose of agent:
         self.last_pos[key] = (x, y)
 
         # update pose of agent for time t:
-        self.poses[key].append({
+        self.per_goal_poses[key].append({
             "t"   : round(t, 4),
             "x"   : round(x, 4),
             "y"   : round(y, 4),
@@ -184,8 +188,8 @@ class PathLoggerNode(Node):
         # save agent data:
         for i in range(1, self.num_agents + 1):
             # extract poses + elapsed time:
-            poses = self.poses[f"agent{i}"]
-            elapsed = (poses[-1]["t"] - poses[0]["t"]) if len(poses) >= 2 else 0.0
+            poses   = self.total_poses[f"agent{i}"]
+            elapsed = (poses[-1][-1]["t"] - poses[0][0]["t"]) if len(poses) >= 2 else 0.0
 
             # collate data:
             data = {
