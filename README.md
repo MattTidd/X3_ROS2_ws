@@ -30,25 +30,35 @@ Currently, the project structure is as follows:
 ├── 📂 scripts/: directory for complementary scripts used to analyze the developed methodology.
 │   └── 📄 visualize_path.py: script used for visualizing the path each agent has taken during 
 │   │       a mission.
-├── 📂 src/: directory containing the ROS2 packages required to operate the developed 
-│   ├──       methodology.
+├── 📂 src/: directory containing the ROS2 packages for the developed methodology.
 │   ├── 📂 rf2o_laser_odometry/: Implementation of an odometric planar laser scan matcher 
 │   │      available here: https://github.com/MAPIRlab/rf2o_laser_odometry.
+│   │
 │   ├── 📂 rplidar_ros/: SLAMTEC LiDAR ROS2 packages, available here:
 │   │      https://github.com/Slamtec/rplidar_ros/.
+│   │
 │   ├── 📂 x3_bringup/: Main package for launching the developed methodology on real hardware.
+│   │
 │   ├── 📂 x3_bt_handler/: Package that hosts the main BT functionality for an agent in the MRS.
+│   │
 │   ├── 📂 x3_covariance_filter/: Packge for running a tunable covariance filter.
+│   │
 │   ├── 📂 x3_description/: Package containing the URDF of an agent within the MRS.
+│   │
 │   ├── 📂 x3_drl_policy/: Package containing the developed DRL formulation, implemented as a 
 │   │      ROS2 node leveraging an action server-client model.
+│   │
 │   ├── 📂 x3_gui_interface/: Package containing the GUI used to interact with the system via the 
 │   │      formation of missions, which are several sequentially ordered tasks.
+│   │
 │   ├── 📂 x3_nav_bringup/: Package containing the goal client used by the developed 
 │   │      DRL formulation.
+│   │
 │   ├── 📂 x3_nav_interfaces/: Package containing the actions and messages used by the 
 │   │      developed methodology.
+│   │
 │   ├── 📂 x3_path_logger/: Package used for logging the odometry of each agent, so it may be 
 │   │      visualized using the visualization script.
+│   │
 │   └── 📂 x3_teleop/: Package for teleoperating an agent, for debugging purposes.
 ```
