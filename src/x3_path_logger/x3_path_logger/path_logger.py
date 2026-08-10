@@ -18,13 +18,13 @@ class PathLoggerNode(Node):
 
         # declare parameters:
         self.declare_parameter("num_agents", 2)
-        self.declare_parameter("path_name", "path1")
-        self.declare_parameter("goal_tolerance", 0.3)
-        self.declare_parameter("save_dir", os.path.join(os.path.expanduser("~"), "recorded_paths"))
+        self.declare_parameter("mission_name", "mission1")
+        self.declare_parameter("goal_tolerance", 0.2)
+        self.declare_parameter("save_dir", os.path.join(os.path.expanduser("~"), "X3_ROS2_ws", "scripts", "recorded_paths"))
 
         # add parameters to the class:
         self.num_agents     = self.get_parameter("num_agents").value
-        self.path_name      = self.get_parameter("path_name").value
+        self.mission_name   = self.get_parameter("mission_name").value
         self.goal_tolerance = self.get_parameter("goal_tolerance").value
         self.save_dir       = self.get_parameter("save_dir").value
 
@@ -66,7 +66,7 @@ class PathLoggerNode(Node):
         self.create_subscription(String, "/mission_complete", self._mission_complete_callback, 10)
 
         # let user know logger is working:
-        self.get_logger().info(f"PathLoggerNode ready | agents: {self.num_agents} | path: {self.path_name}")
+        self.get_logger().info(f"PathLoggerNode ready | agents: {self.num_agents} | mission name: {self.mission_name}")
 
     # method for getting yaw from quaternion:
     def _yaw_from_quaternion(self, q):
@@ -158,7 +158,7 @@ class PathLoggerNode(Node):
 
         # create directory for the mission:
         timestamp   = datetime.datetime.now().strftime('%d%m%y_%H%M')
-        mission_dir = os.path.join(self.save_dir, f"{self.path_name}_{timestamp}")
+        mission_dir = os.path.join(self.save_dir, f"{self.mission_name}_{timestamp}")
         os.makedirs(mission_dir, exist_ok = True)
 
         # save data:
@@ -169,7 +169,7 @@ class PathLoggerNode(Node):
 
             # collate data:
             data = {
-                "path_name"      : self.path_name,
+                "mission_name"   : self.mission_name,
                 "goal_tolerance" : self.goal_tolerance,
                 "elapsed_time"   : round(elapsed, 4),
                 "total_distance" : round(self.total_dist[f"agent{i}"], 4),
