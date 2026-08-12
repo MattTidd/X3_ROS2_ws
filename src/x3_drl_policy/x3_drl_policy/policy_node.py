@@ -440,7 +440,7 @@ class DRLPolicyNode(Node):
         # LiDAR min-pooling:
         raw                = np.array(scan.ranges, dtype = np.float32)
         raw                = np.where(np.isfinite(raw), raw, scan.range_max)    # replace inf/nan with max LiDAR range values
-        raw[1350:1950]     = scan.range_max                     # this range corresponds to the board stack (I think), so I'm masking it
+        raw[1300:2000]     = scan.range_max                     # this range corresponds to the board stack (I think), so I'm masking it
         raw                = np.clip(raw, 0.0, scan.range_max)
         raw                = np.flip(raw)
         n_groups           = 18         
