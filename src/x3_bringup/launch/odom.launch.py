@@ -27,9 +27,9 @@ def generate_ekf_config(agent_name : str, output_dir : str):
 
                 # frame settings:
                 "map_frame"       : "map",
-                "odom_frame"      : "odom",
+                "odom_frame"      : f"{agent_name}_odom",
                 "base_link_frame" : f"{agent_name}_base_link",
-                "world_frame"     : "odom",
+                "world_frame"     : f"{agent_name}_odom",
 
                 # sensor settings:
                 "twist0"              : "vel_covariance",
@@ -147,6 +147,7 @@ def generate_launch_description():
     # set parameters:
     ekf_path        = PathJoinSubstitution([pkg_path, "config", [agent_name, TextSubstitution(text = "_ekf_params.yaml")]])
     base_frame      = PythonExpression(["'", agent_name, "' + '_base_link'"])
+    odom_frame      = PythonExpression(["'", agent_name, "' + '_odom'"])
     imu_frame       = PythonExpression(["'", agent_name, "' + '_imu_link'"])
     
     # laser scan matching node:
@@ -161,7 +162,7 @@ def generate_launch_description():
             "odom_topic"            : "odom_rf2o",
             "publish_tf"            : False,
             "base_frame_id"         : base_frame,
-            "odom_frame_id"         : "odom",
+            "odom_frame_id"         : odom_frame,
             "init_pose_from_topic"  : "",
             "freq"                  : 10.0
         }]
