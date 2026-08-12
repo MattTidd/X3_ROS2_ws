@@ -122,7 +122,7 @@ class X3GuiInterface(Node):
             row[f"{agent_name}_timeouts"]   = m["timeouts"]
 
         # specify the path to write to:
-        path = os.path.expanduser("scripts/recorded_paths/mission_metrics.csv")
+        path = os.path.join(os.path.expanduser("~"), "X3_ROS2_ws", "scripts", "recorded_paths", "mission_metrics.csv")
         write_header = not os.path.exists(path)
 
         # write the row to a file:
