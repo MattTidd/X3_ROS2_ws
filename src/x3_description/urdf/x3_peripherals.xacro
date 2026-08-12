@@ -8,7 +8,7 @@
             <geometry>
                 <mesh filename = "package://x3_description/meshes/lidar.STL" scale = "0.001 0.001 0.001"/>
             </geometry>
-            <material name = "blue"/>
+            <material name = "black"/>
         </visual>
 
         <collision>
