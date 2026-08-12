@@ -11,6 +11,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 from ament_index_python.packages import get_package_share_directory
 import os
+import math
 
 # launch description:
 def generate_launch_description():
@@ -111,11 +112,26 @@ def generate_launch_description():
             "serial_baudrate"  : 1000000,
             "frame_id"         : lidar_frame,
             "inverted"         : False,
-            # "flip_x_axis"      : True,
+            "flip_x_axis"      : True,
             "angle_compensate" : True,
             "scan_mode"        : "DenseBoost"
         }]
     )
+
+    # launch lidar scan filter for this piece of shit robot:
+    lidar_rear_mask_node = Node(
+        package = "x3_bringup",
+        executable = "lidar_rear_mask",
+        name = "lidar_filter",
+        namespace = agent_name,
+        parameters = [{
+            "input_topic" : "scan",
+            "output_topic" : "scan_filtered",
+            "mask_center_angle" : math.pi,
+            "mask_half_width" : 0.80
+        }]
+    )
+
 
     # odometry nodes:
     odom_nodes = IncludeLaunchDescription(
@@ -164,6 +180,7 @@ def generate_launch_description():
         # nodes:
         robot_state_publisher_node,
         lidar_node, 
+        lidar_rear_mask_node,
         odom_nodes, 
         driver_node,
         bt_node

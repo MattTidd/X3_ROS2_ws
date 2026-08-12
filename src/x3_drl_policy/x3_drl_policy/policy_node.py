@@ -122,7 +122,7 @@ class DRLPolicyNode(Node):
 
         # subscribers and publishers:
         self.odom_sub  = self.create_subscription(Odometry, f"/{self.agent_name}/odom", self.odom_callback, qos)
-        self.lidar_sub = self.create_subscription(LaserScan, f"/{self.agent_name}/scan", self.lidar_callback, qos)
+        self.lidar_sub = self.create_subscription(LaserScan, f"/{self.agent_name}/scan_filtered", self.lidar_callback, qos)
         self.cmd_pub   = self.create_publisher(TwistStamped, f"/{self.agent_name}/cmd_vel", 10)
 
         # set active goal handle:
@@ -148,8 +148,16 @@ class DRLPolicyNode(Node):
 
     # define lidar callback:
     def lidar_callback(self, msg : LaserScan):
-        # populate latest scan:
+        ranges = np.array(msg.ranges)
+
+        # index of the zero angle in the (-pi to pi) scan:
+        zero_idx = round(-msg.angle_min / msg.angle_increment)
+
+        # rotate the ranges from (-pi to pi) to (0 to 2pi):
+        ranges_drl = np.roll(ranges, -zero_idx)
+
         self.latest_scan = copy.deepcopy(msg)
+        self.latest_scan.ranges = ranges_drl.tolist()
 
     # define goal callback:
     def goal_callback(self, goal_request : NavigateToGoal):
@@ -440,7 +448,8 @@ class DRLPolicyNode(Node):
         # LiDAR min-pooling:
         raw                = np.array(scan.ranges, dtype = np.float32)
         raw                = np.where(np.isfinite(raw), raw, scan.range_max)    # replace inf/nan with max LiDAR range values
-        raw[1300:2000]     = scan.range_max                     # this range corresponds to the board stack (I think), so I'm masking it
+        raw_mask           = raw <= 0.2
+        raw[raw_mask]      = scan.range_max                     # this range corresponds to the board stack (I think), so I'm masking it
         raw                = np.clip(raw, 0.0, scan.range_max)
         raw                = np.flip(raw)
         n_groups           = 18         
