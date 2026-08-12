@@ -29,7 +29,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "mcnamu_driver = x3_bringup.mcnamu_driver:main"
+            "mcnamu_driver = x3_bringup.mcnamu_driver:main",
+            "lidar_rear_mask = x3_bringup.lidar_rear_mask:main"
         ],
     },
 )

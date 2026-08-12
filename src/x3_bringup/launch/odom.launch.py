@@ -158,7 +158,7 @@ def generate_launch_description():
         namespace = agent_name,
         output = "screen",
         parameters = [{
-            "laser_scan_topic"      : "scan",
+            "laser_scan_topic"      : "scan_filtered",
             "odom_topic"            : "odom_rf2o",
             "publish_tf"            : False,
             "base_frame_id"         : base_frame,
