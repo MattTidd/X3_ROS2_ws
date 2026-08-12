@@ -311,25 +311,6 @@ class BTNode(Node):
         # publish the metrics:
         self.metrics_pub.publish(metrics)
 
-        # if there is a policy process active:
-        if self.policy_process and self.policy_process.poll() is None:
-            # buffer for letting the current control loop iteration to finish:
-            time.sleep(0.1)
-
-            # send a SIGTERM to the node:
-            os.killpg(os.getpgid(self.policy_process.pid), signal.SIGTERM)
-
-            # wait for it to die:
-            self.policy_process.wait()
-
-            # set the policy process to None:
-            self.policy_process = None
-
-            # print to user:
-            self.get_logger().info("Policy process killed.")
-        else:
-            pass
-
     # define method for publishing a bid:
     def publish_bid(self, suitability : float):
         """
@@ -472,7 +453,8 @@ class BTNode(Node):
     # define method for killing the policy node:
     def kill_policy(self):
         """
-        Method for killing the policy. Performs cleanup on the goal process if it has not self-terminated
+        Method for killing the policy. Performs cleanup on the goal process if it has not self-terminated, and terminates
+        the active policy process.
     
         """
         # cleanup on goal process if left hanging:
@@ -487,6 +469,25 @@ class BTNode(Node):
         
         # clear handle:
         self.goal_process = None
+
+        # if there is a policy process active:
+        if self.policy_process and self.policy_process.poll() is None:
+            # buffer for letting the current control loop iteration to finish:
+            time.sleep(0.1)
+
+            # send a SIGTERM to the node:
+            os.killpg(os.getpgid(self.policy_process.pid), signal.SIGTERM)
+
+            # wait for it to die:
+            self.policy_process.wait()
+
+            # set the policy process to None:
+            self.policy_process = None
+
+            # print to user:
+            self.get_logger().info("Policy process killed.")
+        else:
+            pass
 
         # publish a zero velocity:
         cmd              = TwistStamped()
