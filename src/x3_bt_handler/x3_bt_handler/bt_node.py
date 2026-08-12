@@ -431,7 +431,8 @@ class BTNode(Node):
                 "-p", f"model_name:={self.drl_model}",
                 "-p", f"agent_name:={self.agent_name}",
                 "-p", f"agent_initial_yaw:={self.agent_initial_yaw}",
-                "-p", f"goal_timeout:={self.goal_timeout}"], start_new_session = True)
+                "-p", f"goal_timeout:={self.goal_timeout}",
+                "-r", f"__ns:={self.agent_name}"], start_new_session = True)
 
         # if there is no active goal process:
         if self.goal_process is None or self.goal_process.poll() is not None:
@@ -442,7 +443,8 @@ class BTNode(Node):
             # spin up the goal client:
             self.goal_process = subprocess.Popen([
                 "ros2", "run", "x3_nav_bringup", "goal_client", 
-                str(dx), str(dy), f"{self.goal_tolerance}"], start_new_session = True)
+                str(dx), str(dy), f"{self.goal_tolerance}", "-r", 
+                f"__ns:={self.agent_name}"], start_new_session = True)
 
             # reset failure flag, start monitor thread:
             self.nav_failed = False
