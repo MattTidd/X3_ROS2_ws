@@ -37,8 +37,10 @@ class DRLPolicyNode(Node):
         self.declare_parameter("goal_tolerance", 0.3)
         self.declare_parameter("obstacle_tolerance", 0.2)
         self.declare_parameter("model_name", "SAC_099")
+        self.declare_parameter("agent_initial_x", 0.0) 
+        self.declare_parameter("agent_initial_y", 0.0)
         self.declare_parameter("agent_initial_yaw", 0.0)
-        self.declare_parameter('max_lin_vel', 0.33)
+        self.declare_parameter('max_lin_vel', 0.25)
         self.declare_parameter('max_angular_vel', 0.5)
         self.declare_parameter('goal_timeout', 60.0)
 
@@ -48,6 +50,8 @@ class DRLPolicyNode(Node):
         self.obstacle_tolerance = self.get_parameter('obstacle_tolerance').value
         self.model_name         = self.get_parameter('model_name').value
         self.model_type         = self.model_name.split('_')[0]
+        self.agent_initial_x    = self.get_parameter("agent_initial_x").value
+        self.agent_initial_y    = self.get_parameter("agent_initial_y").value
         self.agent_initial_yaw  = self.get_parameter("agent_initial_yaw").value
         self.max_lin_vel        = self.get_parameter('max_lin_vel').value
         self.max_angular_vel    = self.get_parameter('max_angular_vel').value
@@ -103,7 +107,7 @@ class DRLPolicyNode(Node):
         self.d_goal_last         = 0.0
         self.prev_abs_diff       = 0.0
         self.min_dist_last       = 0.0
-        self.d_safe              = 0.75
+        self.d_safe              = 0.5
         self.lidar_idx_threshold = 4
 
         # initialize the scaled reward components:
@@ -426,13 +430,16 @@ class DRLPolicyNode(Node):
         # (for agent_initial_yaw of zero this does not matter)
         cos_spawn      = np.cos(self.agent_initial_yaw) 
         sin_spawn      = np.sin(self.agent_initial_yaw)
-        agent_x_global = cos_spawn * agent_pos.x - sin_spawn * agent_pos.y
-        agent_y_global = sin_spawn * agent_pos.x + cos_spawn * agent_pos.y
+        agent_x_global = self.agent_initial_x + cos_spawn * agent_pos.x - sin_spawn * agent_pos.y
+        agent_y_global = self.agent_initial_y + sin_spawn * agent_pos.x + cos_spawn * agent_pos.y
 
         # perform the calculations required to form the observation -> IN THE GLOBAL FRAME:
         dx    = goal_pos.x - agent_x_global
         dy    = goal_pos.y - agent_y_global
         dgoal = np.sqrt(dx**2 + dy**2)
+
+        # DEBUG:
+        self.get_logger().info(f"global x: {agent_x_global:.3f} | global y: {agent_y_global:.3f} | d_goal: {dgoal:.3f}")
 
         # bearing, heading, and relative bearing:
         bearing     = np.arctan2(dy, dx, dtype = np.float32) % (2 * np.pi)

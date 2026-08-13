@@ -430,6 +430,8 @@ class BTNode(Node):
                 "ros2", "run", "x3_drl_policy", "policy_node", "--ros-args",
                 "-p", f"model_name:={self.drl_model}",
                 "-p", f"agent_name:={self.agent_name}",
+                "-p", f"agent_initial_x:={self.agent_initial_x}",
+                "-p", f"agent_initial_y:={self.agent_initial_y}",
                 "-p", f"agent_initial_yaw:={self.agent_initial_yaw}",
                 "-p", f"goal_timeout:={self.goal_timeout}",
                 "--remap", f"__ns:=/{self.agent_name}"], start_new_session = True)
