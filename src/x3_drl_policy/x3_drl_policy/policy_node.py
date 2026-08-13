@@ -35,11 +35,13 @@ class DRLPolicyNode(Node):
         # declare parameters:
         self.declare_parameter("agent_name", "agent1")
         self.declare_parameter("goal_tolerance", 0.3)
-        self.declare_parameter("obstacle_tolerance", 0.2)
+        self.declare_parameter("obstacle_tolerance", 0.16)
         self.declare_parameter("model_name", "SAC_099")
+        self.declare_parameter("agent_initial_x", 0.0) 
+        self.declare_parameter("agent_initial_y", 0.0)
         self.declare_parameter("agent_initial_yaw", 0.0)
-        self.declare_parameter('max_lin_vel', 0.33)
-        self.declare_parameter('max_angular_vel', 0.5)
+        self.declare_parameter('max_lin_vel', 0.25)
+        self.declare_parameter('max_angular_vel', 0.75)
         self.declare_parameter('goal_timeout', 60.0)
 
         # add parameters to class:
@@ -48,6 +50,8 @@ class DRLPolicyNode(Node):
         self.obstacle_tolerance = self.get_parameter('obstacle_tolerance').value
         self.model_name         = self.get_parameter('model_name').value
         self.model_type         = self.model_name.split('_')[0]
+        self.agent_initial_x    = self.get_parameter("agent_initial_x").value
+        self.agent_initial_y    = self.get_parameter("agent_initial_y").value
         self.agent_initial_yaw  = self.get_parameter("agent_initial_yaw").value
         self.max_lin_vel        = self.get_parameter('max_lin_vel').value
         self.max_angular_vel    = self.get_parameter('max_angular_vel').value
@@ -103,7 +107,7 @@ class DRLPolicyNode(Node):
         self.d_goal_last         = 0.0
         self.prev_abs_diff       = 0.0
         self.min_dist_last       = 0.0
-        self.d_safe              = 0.75
+        self.d_safe              = 0.5
         self.lidar_idx_threshold = 4
 
         # initialize the scaled reward components:
@@ -419,20 +423,16 @@ class DRLPolicyNode(Node):
         agent_vx   = self.action[0]     # agent's velocity in the moving frame
         agent_vyaw = self.action[1]     # agent's yaw velocity about the Z axis in the moving frame
 
-        # define goal posiiton -> IN THE GLOBAL FRAME:
+        # define goal posiiton -> IN THE ODOM FRAME:
         goal_pos = target.pose.position # position of the target
 
-        # perform a transform from rotated odom frame -> GLOBAL FRAME:
-        # (for agent_initial_yaw of zero this does not matter)
-        cos_spawn      = np.cos(self.agent_initial_yaw) 
-        sin_spawn      = np.sin(self.agent_initial_yaw)
-        agent_x_global = cos_spawn * agent_pos.x - sin_spawn * agent_pos.y
-        agent_y_global = sin_spawn * agent_pos.x + cos_spawn * agent_pos.y
-
-        # perform the calculations required to form the observation -> IN THE GLOBAL FRAME:
-        dx    = goal_pos.x - agent_x_global
-        dy    = goal_pos.y - agent_y_global
+        # perform the calculations required to form the observation -> IN THE ODOM FRAME:
+        dx    = goal_pos.x - agent_pos.x
+        dy    = goal_pos.y - agent_pos.y
         dgoal = np.sqrt(dx**2 + dy**2)
+
+        # DEBUG:
+        # self.get_logger().info(f"global x: {agent_x_global:.3f} | global y: {agent_y_global:.3f} | d_goal: {dgoal:.3f}")
 
         # bearing, heading, and relative bearing:
         bearing     = np.arctan2(dy, dx, dtype = np.float32) % (2 * np.pi)
@@ -448,7 +448,7 @@ class DRLPolicyNode(Node):
         # LiDAR min-pooling:
         raw                = np.array(scan.ranges, dtype = np.float32)
         raw                = np.where(np.isfinite(raw), raw, scan.range_max)    # replace inf/nan with max LiDAR range values
-        raw_mask           = raw <= 0.2
+        raw_mask           = raw <= 0.15
         raw[raw_mask]      = scan.range_max                     # this range corresponds to the board stack (I think), so I'm masking it
         raw                = np.clip(raw, 0.0, scan.range_max)
         raw                = np.flip(raw)
@@ -550,8 +550,13 @@ class DRLPolicyNode(Node):
         # turn off gradient updates:
         with torch.no_grad():
             obs_tensor = torch.from_numpy(obs).unsqueeze(0).to(self.device)
-            action = self.policy(obs_tensor)
-        return action.squeeze(0).cpu().numpy()
+            raw_action = self.policy(obs_tensor).squeeze(0).cpu().numpy()
+
+        # rescale from [-1, 1] to actual bounds of action space:
+        low    = np.array([0.0, -1.0])
+        high   = np.array([1.0, 1.0])
+        action = low + 0.5 * (raw_action + 1.0) * (high - low)
+        return action
 
 # define main function:
 def main():
