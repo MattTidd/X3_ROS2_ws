@@ -557,8 +557,13 @@ class DRLPolicyNode(Node):
         # turn off gradient updates:
         with torch.no_grad():
             obs_tensor = torch.from_numpy(obs).unsqueeze(0).to(self.device)
-            action = self.policy(obs_tensor)
-        return action.squeeze(0).cpu().numpy()
+            raw_action = self.policy(obs_tensor).squeeze(0).cpu().numpy()
+
+        # rescale from [-1, 1] to actual bounds of action space:
+        low    = self.action_space.low
+        high   = self.action_space.high
+        action = low + 0.5 * (raw_action + 1.0) * (high - low)
+        return action
 
 # define main function:
 def main():
