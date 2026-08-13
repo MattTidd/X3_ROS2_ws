@@ -80,6 +80,13 @@ def generate_launch_description():
         description   = "DRL model to be used for the navigational policy"
     )
 
+    goal_tolerance = LaunchConfiguration("goal_tolerance")
+    goal_tolerance_arg = DeclareLaunchArgument(
+        "goal_tolerance",
+        default_value = "0.2",
+        description   = "Tolerance for goal completion"
+    )
+
     # form the robot description:
     robot_description = ParameterValue(
         Command(["xacro ", model, " agent_name:=", agent_name, " agent_type:=", agent_type]),
@@ -162,7 +169,8 @@ def generate_launch_description():
             "agent_initial_yaw"  : agent_initial_yaw,
             "num_agents"         : num_agents,
             "drl_model"          : drl_model,
-            "model_path"         : model_path
+            "model_path"         : model_path,
+            "goal_tolerance"     : goal_tolerance
         }.items()
     )
 
@@ -176,6 +184,7 @@ def generate_launch_description():
         agent_initial_yaw_arg,
         num_agents_arg,
         drl_model_arg,
+        goal_tolerance_arg,
 
         # nodes:
         robot_state_publisher_node,
