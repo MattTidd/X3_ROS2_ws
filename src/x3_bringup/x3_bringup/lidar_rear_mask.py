@@ -45,7 +45,7 @@ class LidarRearMaskNode(Node):
             self.mask_value_mode = 'zero'
 
         qos = QoSProfile(
-            reliability=QoSReliabilityPolicy.RELIABLE,
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=10,
         )
@@ -81,11 +81,19 @@ class LidarRearMaskNode(Node):
                 if has_intensities:
                     intensities[i] = 0.0
 
-        msg.ranges = ranges
-        if has_intensities:
-            msg.intensities = intensities
+        out = LaserScan()
+        out.header = msg.header
+        out.angle_min = msg.angle_min
+        out.angle_max = msg.angle_max
+        out.angle_increment = msg.angle_increment
+        out.time_increment = msg.time_increment
+        out.scan_time = msg.scan_time
+        out.range_min = msg.range_min
+        out.range_max = msg.range_max
+        out.ranges = ranges
+        out.intensities = intensities if has_intensities else []
 
-        self.pub.publish(msg)
+        self.pub.publish(out)
 
 def main(args=None):
     rclpy.init(args=args)
