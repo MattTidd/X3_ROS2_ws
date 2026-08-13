@@ -423,23 +423,16 @@ class DRLPolicyNode(Node):
         agent_vx   = self.action[0]     # agent's velocity in the moving frame
         agent_vyaw = self.action[1]     # agent's yaw velocity about the Z axis in the moving frame
 
-        # define goal posiiton -> IN THE GLOBAL FRAME:
+        # define goal posiiton -> IN THE ODOM FRAME:
         goal_pos = target.pose.position # position of the target
 
-        # perform a transform from rotated odom frame -> GLOBAL FRAME:
-        # (for agent_initial_yaw of zero this does not matter)
-        cos_spawn      = np.cos(self.agent_initial_yaw) 
-        sin_spawn      = np.sin(self.agent_initial_yaw)
-        agent_x_global = self.agent_initial_x + cos_spawn * agent_pos.x - sin_spawn * agent_pos.y
-        agent_y_global = self.agent_initial_y + sin_spawn * agent_pos.x + cos_spawn * agent_pos.y
-
-        # perform the calculations required to form the observation -> IN THE GLOBAL FRAME:
-        dx    = goal_pos.x - agent_x_global
-        dy    = goal_pos.y - agent_y_global
+        # perform the calculations required to form the observation -> IN THE ODOM FRAME:
+        dx    = goal_pos.x - agent_pos.x
+        dy    = goal_pos.y - agent_pos.y
         dgoal = np.sqrt(dx**2 + dy**2)
 
         # DEBUG:
-        self.get_logger().info(f"global x: {agent_x_global:.3f} | global y: {agent_y_global:.3f} | d_goal: {dgoal:.3f}")
+        # self.get_logger().info(f"global x: {agent_x_global:.3f} | global y: {agent_y_global:.3f} | d_goal: {dgoal:.3f}")
 
         # bearing, heading, and relative bearing:
         bearing     = np.arctan2(dy, dx, dtype = np.float32) % (2 * np.pi)
