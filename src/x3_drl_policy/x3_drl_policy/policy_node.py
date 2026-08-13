@@ -560,8 +560,8 @@ class DRLPolicyNode(Node):
             raw_action = self.policy(obs_tensor).squeeze(0).cpu().numpy()
 
         # rescale from [-1, 1] to actual bounds of action space:
-        low    = self.action_space.low
-        high   = self.action_space.high
+        low    = np.array([0.0, -1.0])
+        high   = np.array([1.0, 1.0])
         action = low + 0.5 * (raw_action + 1.0) * (high - low)
         return action
 
