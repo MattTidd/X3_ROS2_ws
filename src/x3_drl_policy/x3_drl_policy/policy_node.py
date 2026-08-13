@@ -35,13 +35,13 @@ class DRLPolicyNode(Node):
         # declare parameters:
         self.declare_parameter("agent_name", "agent1")
         self.declare_parameter("goal_tolerance", 0.3)
-        self.declare_parameter("obstacle_tolerance", 0.21)
+        self.declare_parameter("obstacle_tolerance", 0.16)
         self.declare_parameter("model_name", "SAC_099")
         self.declare_parameter("agent_initial_x", 0.0) 
         self.declare_parameter("agent_initial_y", 0.0)
         self.declare_parameter("agent_initial_yaw", 0.0)
         self.declare_parameter('max_lin_vel', 0.25)
-        self.declare_parameter('max_angular_vel', 0.5)
+        self.declare_parameter('max_angular_vel', 0.75)
         self.declare_parameter('goal_timeout', 60.0)
 
         # add parameters to class:
@@ -448,7 +448,7 @@ class DRLPolicyNode(Node):
         # LiDAR min-pooling:
         raw                = np.array(scan.ranges, dtype = np.float32)
         raw                = np.where(np.isfinite(raw), raw, scan.range_max)    # replace inf/nan with max LiDAR range values
-        raw_mask           = raw <= 0.2
+        raw_mask           = raw <= 0.15
         raw[raw_mask]      = scan.range_max                     # this range corresponds to the board stack (I think), so I'm masking it
         raw                = np.clip(raw, 0.0, scan.range_max)
         raw                = np.flip(raw)
