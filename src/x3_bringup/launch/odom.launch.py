@@ -63,7 +63,7 @@ def generate_ekf_config(agent_name : str, output_dir : str):
                 "imu0_config"                            : [False, False, False,
                                                             False, False, False, 
                                                             False, False, False,
-                                                            True, True, True,  
+                                                            False, False, True,  
                                                             True,  True, False],
 
                 # advanced settings:
