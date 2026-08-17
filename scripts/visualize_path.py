@@ -54,7 +54,7 @@ def load_goal_json(mission_dir: str) -> dict:
     return data
 
 # set directory to the paths:
-mission_name = "mission_3"
+mission_name = "mission_11"
 mission_dir  = os.path.join(os.path.expanduser("~"), "X3_ROS2_ws", "scripts", "recorded_paths", mission_name)
 
 # load the agent and goal data:
@@ -63,12 +63,21 @@ goal_data  = load_goal_json(mission_dir = mission_dir)
 
 # define initial odometry of agents used:
 agent_params = {
-    "agent1" : {"type" : "typeA", "x" : 0.0, "y" : 0.0},
-    # "agent2" : {"type" : "typeB", "x" : 1.0, "y" : 0.5}
+    "agent1" : {"type" : "typeA", "x" : -1.64, "y" : 0.22},
+    "agent2" : {"type" : "typeB", "x" : -1.64, "y" : -0.509}
 }
+
+settings = {
+    "figure.autolayout": True,
+    "font.size": 18,
+    "font.family": "serif",
+    "font.serif": ["Times New Roman", "DejaVu Serif", "serif"],
+}
+plt.rcParams.update(settings)
 
 # define a figure:
 fig, ax = plt.subplots(figsize = (10, 10))
+i = 1
 
 # for every agent:
 for agent_id, data in agent_data.items():
@@ -99,32 +108,29 @@ for agent_id, data in agent_data.items():
     goal_tolerance = data["goal_tolerance"]
 
     # form label for plot:
-    label = f"{agent_id} | {elapsed:.2f}s | {distance:.2f}m"
+    label = f"Agent {i}"
 
     # plot line:
     line = ax.plot(total_x, total_y, "--", alpha = 0.5, lw = 2, color = colour, label = label)
-
-    # draw arrows for heading:
-    indices = range(0, len(total_x), 100)
-    ax.quiver(
-        [total_x[i] for i in indices],
-        [total_y[i] for i in indices],
-        [np.cos(total_yaw[i]) for i in indices],
-        [np.sin(total_yaw[i]) for i in indices],
-        color      = line[0].get_color(),
-        scale      = 75, 
-        width      = 0.004,
-        headwidth  = 5,
-        headlength = 5,
-        alpha      = 1.0
-    )
 
     # mark the start and end of the path:
     ax.scatter(total_x[0],  total_y[0],  marker = "o", s = 80, color = colour, zorder = 5)
     ax.scatter(total_x[-1], total_y[-1], marker = "X", s = 80, color = colour, zorder = 5)
 
+    # advance counter: 
+    i += 1
+
 # TODO manually add obstacles here:
-ax.add_patch(patches.Rectangle((2.1, 0), width = 0.28, height = 0.19, color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((-0.63, -0.06),      width = 0.26,   height = 0.34,  color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((-0.925, 0),         width = 0.29,   height = 0.195, color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((-0.6375, -1.215),   width = 0.135,  height = 0.34,  color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((0.51, 0.14),        width = 0.165,  height = 0.237, color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((-0.125, 1.07),      width = 0.235,  height = 0.29,  color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((-1.405, 1.02),      width = 0.42,   height = 0.22,  color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((1.19, -0.955),      width = 0.32,   height = 0.32,  color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((1.98, -0.55),       width = 0.315,  height = 0.47,  color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((1.53, 0.65),        width = 0.12,   height = 0.23,  color = "black", alpha = 0.5))
+ax.add_patch(patches.Rectangle((0.925, 1.53),       width = 0.39,   height = 0.25,  color = "black", alpha = 0.5))
 
 # TODO add goal plotting:
 # set tolerance, plot circle for goal and dilate by tolerance
@@ -143,14 +149,15 @@ for goal_id, data in goal_data.items():
 # plot settings:
 ax.set_xlabel("x (m)")
 ax.set_ylabel("y (m)")
-ax.set_xlim((-4.0, 4.0))
-ax.set_ylim((-4.0, 4.0))
-ax.tick_params(axis = "both", which = "both", direction = "in", labelsize = "14")
-ax.minorticks_on()
+ax.set_xlim((-2.5, 2.5))
+ax.set_ylim((-1.5, 2))
+ax.tick_params(axis = "both", which = "both", direction = "in")
+ax.minorticks_off()
 ax.grid(False)
 ax.legend(loc = "upper left", fontsize = 14)
 ax.set_aspect("equal")
-ax.set_title(os.path.basename(mission_dir), fontsize = 14)
+plt.title("Mission 6")
 plt.tight_layout()
+plt.savefig(f"{mission_name}.svg", format = "svg", bbox_inches = "tight")
 plt.show()
 
