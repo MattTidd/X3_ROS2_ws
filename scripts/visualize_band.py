@@ -254,7 +254,7 @@ base_dir = os.path.join(os.path.expanduser("~"), "X3_ROS2_ws", "scripts", "recor
 mission_names = [f"mission_{i}" for i in range(6, 12)]
 
 # define title of plot:
-plot_title = "Mean Agent Trajectory with Min-Max Envelope"
+plot_title = "Mean Agent Trajectory"
 
 # define the save name:
 save_name = "mean_trajectory_band"
@@ -321,12 +321,12 @@ for agent_idx, (agent_id, adata) in enumerate(agent_runs.items(), start = 1):
 
     # plot upper and lower band:
     ax.plot(
-        band["x_upper"][:-2],
-        band["y_upper"][:-2],
+        band["x_upper"][:-1],
+        band["y_upper"][:-1],
         "-",
         color=colour,
         lw=2,
-        alpha=0.4
+        alpha=0.8
     )
 
     ax.fill(
@@ -339,17 +339,17 @@ for agent_idx, (agent_id, adata) in enumerate(agent_runs.items(), start = 1):
             band["y_lower"][::-1]
         ]),
         color=colour,
-        alpha=0.2,
-        linewidth=0
+        alpha=0.15,
+        linewidth=0,
     )
 
     ax.plot(
-        band["x_lower"][:-2],
-        band["y_lower"][:-2],
+        band["x_lower"][:-5],
+        band["y_lower"][:-5],
         "-",
         color=colour,
         lw=2,
-        alpha=0.4
+        alpha=0.8
     )
 
     # mark the start position:
@@ -399,7 +399,7 @@ for goal_id, data in goal_data.items():
 
     # plot:
     ax.add_patch(patches.Circle((goal_x, goal_y), radius = 0.015,    color = goal_colour, alpha = 0.90))
-    ax.add_patch(patches.Circle((goal_x, goal_y), radius = goal_tol, color = goal_colour, alpha = 0.15))
+    ax.add_patch(patches.Circle((goal_x, goal_y), radius = goal_tol, color = goal_colour, alpha = 0.15, zorder = 1))
 
 # plot settings:
 ax.set_xlabel("x (m)")
@@ -415,27 +415,3 @@ plt.title(plot_title)
 plt.tight_layout()
 plt.savefig(f"{save_name}.svg", format = "svg", bbox_inches = "tight")
 plt.show()
-
-
-
-
-
-
-
-
-    #         # find closest point on mean trajectory
-    #         diff = mean_points - point
-    #         dist_sq = np.sum(diff**2, axis=1)
-    #         j = np.argmin(dist_sq)
-
-    #         # vector from mean to trajectory point
-    #         dx = point[0] - mean_x[j]
-    #         dy = point[1] - mean_y[j]
-
-    #         # signed perpendicular distance
-    #         d = (
-    #             dx * normal_x[j]
-    #             + dy * normal_y[j]
-    #         )
-
-    #         distance_bins[j].append(d)
