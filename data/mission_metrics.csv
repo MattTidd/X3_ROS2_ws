@@ -1,0 +1,7 @@
+tasks,makespan,reauctions,agent1_tasks,agent1_distance,agent1_collisions,agent1_timeouts,agent2_tasks,agent2_distance,agent2_collisions,agent2_timeouts
+6,94.977,0,3,5.976,0,0,3,6.657,0,0
+6,97.059,0,3,5.826,0,0,3,6.539,0,0
+6,94.213,0,3,6.289,0,0,3,6.505,0,0
+6,95.683,0,3,6.775,0,0,3,6.116,0,0
+6,96.349,0,3,6.149,0,0,3,6.821,0,0
+6,97.904,0,3,6.123,0,0,3,6.741,0,0
