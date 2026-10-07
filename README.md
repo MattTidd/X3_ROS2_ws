@@ -1,7 +1,7 @@
 # X3_ROS2_ws:
 Practical implementation of a developed methodology for performing task allocation and execution on heterogeneously composed multi-robot systems (MRS) using Deep Reinforcement Learning (DRL) and Behaviour Trees (BTs).
 
-https://github.com/user-attachments/assets/12986d0c-8a9d-4490-a42d-3883809144b5
+https://github.com/user-attachments/assets/b27f7f70-ce9b-426f-9c56-b34e533b1478
 
 ## Usage:
 To launch a given agent within the MRS, the following can be run in the command line:
