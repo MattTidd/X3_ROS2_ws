@@ -1,6 +1,8 @@
 # X3_ROS2_ws:
 Practical implementation of a developed methodology for performing task allocation and execution on heterogeneously composed multi-robot systems (MRS) using Deep Reinforcement Learning (DRL) and Behaviour Trees (BTs).
 
+https://github.com/user-attachments/assets/12986d0c-8a9d-4490-a42d-3883809144b5
+
 ## Usage:
 To launch a given agent within the MRS, the following can be run in the command line:
 
@@ -53,9 +55,14 @@ Which accepts the following arguments:
 ros2 run x3_path_logger path_logger_node --ros-args -p num_agents:=1 -p goal_tolerance:=0.2
 ```
 
+**An example of the methodology running on real agents is given below:**
+
+https://github.com/user-attachments/assets/d1879068-753d-4001-bac8-043d5e23ea80
+
 ## Project Structure:
 Currently, the project structure is as follows:
 ```txt
+├── 📂 data/: directory containing the data from practical testing.
 ├── 📂 scripts/: directory for complementary scripts used to analyze the developed methodology.
 │   └── 📄 visualize_path.py: script used for visualizing the path each agent has taken during 
 │   │       a mission.
